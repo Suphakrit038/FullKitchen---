@@ -1,6 +1,6 @@
 /**
  * ========================================
- * components/RecipeForm.jsx - Add/Edit Recipe Form
+ * components/RecipeForm.jsx - ฟอร์มเพิ่ม/แก้ไขสูตร (Add/Edit Recipe Form)
  * ========================================
  * 
  * 📝 คำอธิบาย:
@@ -50,7 +50,7 @@ import MenuItem from '@mui/material/MenuItem'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
-import { addRecipe, updateRecipe } from '../lib/recipes'
+import { addRecipe, updateRecipe } from '../lib/api'
 
 export default function RecipeForm({ recipe = null, mode = 'add' }) {
   const router = useRouter()

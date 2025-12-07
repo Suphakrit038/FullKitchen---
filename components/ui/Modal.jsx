@@ -1,45 +1,25 @@
 /**
  * ========================================
- * components/ui/Modal.jsx - Reusable Modal Component
+ * components/ui/Modal.jsx - หน้าต่าง Modal (Reusable Modal Component)
  * ========================================
  * 
- * 📝 คำอธิบาย:
- * Generic modal component สำหรับแสดงเนื้อหาใน popup
- * wrapper รอบ MUI Dialog ให้ใช้งานง่ายขึ้น
- * responsive - fullScreen บน mobile
+ * หน้าที่:
+ * - Generic modal component wrapper รอบ MUI Dialog
+ * - Responsive (fullScreen บน mobile)
+ * - รองรับ title, content, actions
  * 
- * 🎯 Features:
- * - Title bar พร้อมปุ่มปิด (X)
- * - Content area (children)
- * - Footer actions (custom buttons)
- * - maxWidth responsive
- * - ปิดได้ด้วย ESC หรือคลิกนอก modal
+ * Components ที่ใช้:
+ * - Material-UI Dialog, IconButton, useMediaQuery
  * 
- * 💡 Tips สำหรับการ implement:
- * 1. รองรับ title, children, actions, onClose
- * 2. ปุ่ม X มุมบนขวา (IconButton)
- * 3. ใช้ useMediaQuery เช็ค mobile → fullScreen
- * 4. เพิ่ม loading overlay สำหรับ async operations
- * 5. เพิ่ม smooth transitions
+ * ถูกเรียกใช้โดย:
+ * - (ยังไม่มี - จะใช้สำหรับ features ในอนาคต)
  * 
- * 📦 ตัวอย่างการใช้:
- * ```jsx
- * <Modal
- *   open={isOpen}
- *   title="รายละเอียดสูตร"
- *   onClose={() => setIsOpen(false)}
- *   actions={
- *     <Button onClick={handleSave}>บันทึก</Button>
- *   }
- * >
- *   <Typography>Content here...</Typography>
- * </Modal>
- * ```
- * 
- * ⚠️ สิ่งที่ต้องระวัง:
- * - อย่าลืมจัดการ onClose ให้ดี
- * - modal ซ้อน modal อาจมีปัญหา z-index
- * - fullScreen บน mobile ต้องมีปุ่มปิดชัดเจน
+ * TODO List:
+ * - [ ] สร้าง Modal component ด้วย MUI Dialog
+ * - [ ] รองรับ title, children, actions, onClose props
+ * - [ ] เพิ่มปุ่ม X มุมบนขวา
+ * - [ ] เพิ่ม fullScreen บน mobile (useMediaQuery)
+ * - [ ] เพิ่ม loading overlay support
  * ========================================
  */
 
@@ -52,12 +32,6 @@ import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import Box from '@mui/material/Box'
-
-// TODO: 🟢 สร้าง generic Modal component
-// - wrapper สำหรับ MUI Dialog
-// - รองรับ title, children, actions
-// - ปุ่มปิดมุมบนขวา
-// - responsive: fullScreen บน mobile
 
 export default function Modal({
   open = false,

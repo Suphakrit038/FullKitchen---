@@ -1,6 +1,6 @@
 /**
  * ========================================
- * components/Header.jsx - Navigation Bar
+ * components/Header.jsx - แถบนำทาง (Navigation Bar)
  * ========================================
  * 
  * 📝 คำอธิบาย:

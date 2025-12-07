@@ -1,6 +1,6 @@
 /**
  * ========================================
- * components/RecipeCard.jsx - Recipe Preview Card
+ * components/RecipeCard.jsx - การ์ดแสดงสูตร (Recipe Preview Card)
  * ========================================
  * 
  * 📝 คำอธิบาย:
@@ -41,7 +41,7 @@ import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import { timeAgo } from '../lib/utils'
+import { timeAgo } from '../lib/utils.client'
 
 export default function RecipeCard({ recipe }) {
   const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0)

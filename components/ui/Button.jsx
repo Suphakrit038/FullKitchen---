@@ -1,40 +1,26 @@
 /**
  * ========================================
- * components/ui/Button.jsx - Custom Button Component
+ * components/ui/Button.jsx - ปุ่มแบบกำหนดเอง (Custom Button Component)
  * ========================================
  * 
- * 📝 คำอธิบาย:
- * Custom wrapper สำหรับ MUI Button
- * เพิ่ม loading state และ consistent styling
- * ใช้แทน MUI Button ทั่วทั้งโปรเจ็ค
- * 
- * 🎯 Features เพิ่มเติม:
- * - loading prop (แสดง spinner + disable)
+ * หน้าที่:
+ * - Custom wrapper สำหรับ MUI Button เพิ่ม loading state
  * - รองรับ MUI Button props ทั้งหมด
- * - consistent styling
+ * - Consistent styling ทั่วทั้งโปรเจ็ค
  * 
- * 💡 Tips สำหรับการ implement:
- * 1. รับ loading prop แยกจาก disabled
- * 2. ถ้า loading=true → แสดง CircularProgress + disable button
- * 3. spread ...props ไปยัง MUI Button
- * 4. เพิ่ม custom variants (danger, success)
- * 5. เพิ่ม tooltip support
+ * Components ที่ใช้:
+ * - Material-UI Button, CircularProgress
  * 
- * 📦 ตัวอย่างการใช้:
- * ```jsx
- * <Button
- *   loading={isSaving}
- *   variant="contained"
- *   onClick={handleSave}
- * >
- *   บันทึก
- * </Button>
- * ```
+ * ถูกเรียกใช้โดย:
+ * - RecipeForm (ปุ่มบันทึก)
+ * - NotesSection (ปุ่มเพิ่ม note)
+ * - ทุก component ที่มีปุ่ม action
  * 
- * ⚠️ สิ่งที่ต้องระวัง:
- * - loading state ต้อง disable button ด้วย
- * - spinner size ต้องเหมาะกับ button size
- * - อย่าลืม spread ...props มาจาก parent
+ * TODO List:
+ * - [ ] รับ loading prop และแสดง CircularProgress
+ * - [ ] เพิ่ม custom variants (danger, success)
+ * - [ ] เพิ่ม tooltip support
+ * - [ ] Responsive size สำหรับ mobile
  * ========================================
  */
 

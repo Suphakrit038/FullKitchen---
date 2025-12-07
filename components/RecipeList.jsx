@@ -1,3 +1,33 @@
+/**
+ * ========================================
+ * components/RecipeList.jsx - รายการสูตรอาหาร (Recipe List Component)
+ * ========================================
+ * 
+ * หน้าที่:
+ * - แสดงรายการสูตรอาหารทั้งหมดแบบ grid layout
+ * - มีระบบค้นหาแบบ real-time (ชื่อ, tags, ส่วนผสม)
+ * - แสดง loading state ขณะโหลดข้อมูล
+ * 
+ * Components ที่ใช้:
+ * - RecipeCard: แสดงสูตรแต่ละรายการ
+ * - Material-UI components: Grid, TextField, SearchIcon
+ * 
+ * ถูกเรียกใช้โดย:
+ * - app/page.js (หน้าแรก)
+ * - app/recipes/page.js (หน้ารายการสูตร)
+ * 
+ * Service ที่เรียกใช้:
+ * - getAllRecipes(): ดึงข้อมูลสูตรทั้งหมดจาก database
+ * 
+ * TODO List:
+ * - [ ] เพิ่ม Sort dropdown (เรียงตามชื่อ, วันที่, เวลา)
+ * - [ ] เพิ่ม Filter by tags (Chip selection)
+ * - [ ] เพิ่ม Filter by difficulty
+ * - [ ] เพิ่ม pagination หรือ infinite scroll
+ * - [ ] เพิ่ม loading skeleton แทน CircularProgress
+ * ========================================
+ */
+
 "use client"
 import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
@@ -8,7 +38,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import CircularProgress from '@mui/material/CircularProgress'
 import SearchIcon from '@mui/icons-material/Search'
 import RecipeCard from './RecipeCard'
-import { getAllRecipes } from '../lib/recipes'
+import { getAllRecipes } from '../lib/api'
 
 export default function RecipeList() {
   const [recipes, setRecipes] = useState([])
@@ -32,9 +62,6 @@ export default function RecipeList() {
       )
       setFilteredRecipes(filtered)
     }
-    // TODO: เพิ่ม Sort dropdown (เรียงตามชื่อ, วันที่, เวลา)
-    // TODO: เพิ่ม Filter by tags (Chip selection)
-    // TODO: เพิ่ม Filter by difficulty
   }, [searchQuery, recipes])
 
   async function loadRecipes() {

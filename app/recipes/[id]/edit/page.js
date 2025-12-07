@@ -1,13 +1,40 @@
+/**
+ * ========================================
+ * app/recipes/[id]/edit/page.js - หน้าแก้ไขสูตร (Edit Recipe)
+ * Route: /recipes/:id/edit
+ * ========================================
+ * 
+ * หน้าที่:
+ * - หน้าสำหรับแก้ไขสูตรที่มีอยู่ (route: /recipes/:id/edit)
+ * - โหลดข้อมูลเดิมมาแสดงในฟอร์ม
+ * 
+ * Components ที่ใช้:
+ * - RecipeForm: ฟอร์มเพิ่ม/แก้ไขสูตร (mode="edit")
+ * 
+ * ถูกเรียกใช้โดย:
+ * - หน้ารายละเอียดสูตร (ปุ่ม "แก้ไข")
+ * 
+ * Service ที่เรียกใช้:
+ * - getRecipeById(): ดึงข้อมูลสูตรเดิม
+ * 
+ * TODO List:
+ * - [ ] แทน console.error ด้วย Toast
+ * - [ ] เพิ่ม unsaved changes warning
+ * - [ ] ใช้ Skeleton แทน CircularProgress
+ * - [ ] เพิ่ม dynamic page metadata
+ * ========================================
+ */
+
 "use client"
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import RecipeForm from '../../../../../components/RecipeForm'
-import { getRecipeById } from '../../../../../lib/recipes'
+import RecipeForm from '../../../../components/RecipeForm'
+import { getRecipeById } from '../../../../lib/api'
 
-// TODO: 🟢 เพิ่ม error handling
+// TODO: เพิ่ม error handling
 // - แทน console.error ด้วย Toast
 // - แสดง error message ถ้า load ไม่สำเร็จ
 // - ปุ่ม retry

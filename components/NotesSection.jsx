@@ -1,3 +1,34 @@
+/**
+ * ========================================
+ * components/NotesSection.jsx - ส่วนจัดการโน้ต (Notes Management Section)
+ * ========================================
+ * 
+ * หน้าที่:
+ * - แสดงและจัดการ notes ในสูตรอาหาร
+ * - สามารถเพิ่ม แก้ไข ลบ notes
+ * - แสดงวันที่สร้าง/แก้ไข notes
+ * 
+ * Components ที่ใช้:
+ * - Material-UI components: Paper, List, TextField, Buttons
+ * 
+ * ถูกเรียกใช้โดย:
+ * - app/recipes/[id]/page.js (หน้ารายละเอียดสูตร)
+ * 
+ * Service ที่เรียกใช้:
+ * - addNoteToRecipe(): เพิ่ม note ใหม่
+ * - updateNote(): แก้ไข note
+ * - deleteNote(): ลบ note
+ * - formatDate(): จัดรูปแบบวันที่
+ * 
+ * TODO List:
+ * - [ ] แทน alert() ด้วย Toast notifications
+ * - [ ] แทน confirm() ด้วย ConfirmDialog
+ * - [ ] เพิ่ม rich text editor สำหรับ notes
+ * - [ ] เพิ่ม search/filter notes
+ * - [ ] เพิ่ม note categories/tags
+ * ========================================
+ */
+
 "use client"
 import React, { useState } from 'react'
 import Box from '@mui/material/Box'
@@ -14,8 +45,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import CancelIcon from '@mui/icons-material/Cancel'
-import { addNoteToRecipe, updateNote, deleteNote } from '../lib/recipes'
-import { formatDate } from '../lib/utils'
+import { addNoteToRecipe, updateNote, deleteNote } from '../lib/api'
+import { formatDate } from '../lib/utils.client'
 
 export default function NotesSection({ recipeId, notes = [], onUpdate }) {
   const [newNote, setNewNote] = useState('')
@@ -30,11 +61,9 @@ export default function NotesSection({ recipeId, notes = [], onUpdate }) {
       setLoading(true)
       await addNoteToRecipe(recipeId, newNote)
       setNewNote('')
-      // TODO: แสดง success Toast
       if (onUpdate) onUpdate()
     } catch (error) {
       console.error('Error adding note:', error)
-      // TODO: แสดง error Toast แทน alert()
       alert('เกิดข้อผิดพลาดในการเพิ่มโน้ต')
     } finally {
       setLoading(false)
@@ -49,11 +78,9 @@ export default function NotesSection({ recipeId, notes = [], onUpdate }) {
       await updateNote(recipeId, noteId, editText)
       setEditingId(null)
       setEditText('')
-      // TODO: แสดง success Toast
       if (onUpdate) onUpdate()
     } catch (error) {
       console.error('Error updating note:', error)
-      // TODO: แสดง error Toast แทน alert()
       alert('เกิดข้อผิดพลาดในการแก้ไขโน้ต')
     } finally {
       setLoading(false)
@@ -61,17 +88,14 @@ export default function NotesSection({ recipeId, notes = [], onUpdate }) {
   }
 
   const handleDeleteNote = async (noteId) => {
-    // TODO: ใช้ ConfirmDialog component แทน confirm()
     if (!confirm('ต้องการลบโน้ตนี้หรือไม่?')) return
 
     try {
       setLoading(true)
       await deleteNote(recipeId, noteId)
-      // TODO: แสดง success Toast
       if (onUpdate) onUpdate()
     } catch (error) {
       console.error('Error deleting note:', error)
-      // TODO: แสดง error Toast แทน alert()
       alert('เกิดข้อผิดพลาดในการลบโน้ต')
     } finally {
       setLoading(false)

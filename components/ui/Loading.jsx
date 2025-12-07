@@ -1,57 +1,27 @@
 /**
  * ========================================
- * components/ui/Loading.jsx - Loading Components
+ * components/ui/Loading.jsx - คอมโพเนนต์โหลด (Loading Components)
  * ========================================
  * 
- * 📝 คำอธิบาย:
- * รวม loading components หลายแบบไว้ที่เดียว
- * ใช้แทน loading state ต่างๆ ทั่วโปรเจ็ค
- * ทำให้ loading experience ดีขึ้นและ consistent
+ * หน้าที่:
+ * - รวม loading components หลายแบบไว้ที่เดียว
+ * - LoadingSpinner, LoadingSkeleton, LoadingBar, LoadingOverlay
+ * - Consistent loading experience ทั่วโปรเจ็ค
  * 
- * 🎯 Components ที่มี:
- * - LoadingSpinner: spinner + text (centered)
- * - LoadingSkeleton: placeholder shapes (better UX)
- * - LoadingDots: inline loading text animation
- * - LoadingBar: progress bar บนสุดหน้า
- * - LoadingOverlay: fullscreen overlay + spinner
+ * Components ที่ใช้:
+ * - Material-UI CircularProgress, Skeleton, LinearProgress
  * 
- * 💡 Tips สำหรับแต่ละ component:
+ * ถูกเรียกใช้โดย:
+ * - RecipeList (LoadingSkeleton)
+ * - app/recipes/[id]/edit/page.js (LoadingSpinner)
+ * - ทุก component ที่ต้องการ loading state
  * 
- * LoadingSpinner:
- * - ใช้สำหรับ loading ทั่วไป
- * - รองรับ size, text, fullScreen props
- * 
- * LoadingSkeleton:
- * - ใช้แทน spinner เพื่อ UX ดีกว่า
- * - แสดง "ghost" ของเนื้อหาจริง
- * - variants: card, list, text
- * 
- * LoadingBar:
- * - ใช้สำหรับ page transitions
- * - แสดงบนสุดหน้า (like YouTube)
- * - progress 0-100%
- * 
- * LoadingOverlay:
- * - block interaction ทั้งหน้า
- * - ใช้กับ critical async operations
- * 
- * 📦 ตัวอย่างการใช้:
- * ```jsx
- * // แทน CircularProgress ธรรมดา
- * {loading && <LoadingSpinner text="กำลังโหลด..." />}
- * 
- * // ใช้ Skeleton (better UX)
- * {loading ? (
- *   <LoadingSkeleton variant="card" count={3} />
- * ) : (
- *   recipes.map(r => <RecipeCard key={r.id} recipe={r} />)
- * )}
- * ```
- * 
- * ⚠️ สิ่งที่ต้องระวัง:
- * - LoadingSkeleton ต้องมีขนาดใกล้เคียงเนื้อหาจริง
- * - LoadingOverlay จะ block interaction - ใช้เฉพาะจำเป็น
- * - LoadingBar ต้อง update progress แบบ smooth
+ * TODO List:
+ * - [ ] สร้าง LoadingSpinner (centered spinner + text)
+ * - [ ] สร้าง LoadingSkeleton (card, list, text variants)
+ * - [ ] สร้าง LoadingBar (page transition)
+ * - [ ] สร้าง LoadingOverlay (fullscreen block)
+ * - [ ] แทน CircularProgress ด้วย LoadingSpinner/Skeleton
  * ========================================
  */
 

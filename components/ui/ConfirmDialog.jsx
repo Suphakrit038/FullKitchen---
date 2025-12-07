@@ -1,47 +1,29 @@
 /**
  * ========================================
- * components/ui/ConfirmDialog.jsx - Confirmation Dialog
+ * components/ui/ConfirmDialog.jsx - หน้าต่างยืนยัน (Confirmation Dialog)
  * ========================================
  * 
- * 📝 คำอธิบาย:
- * Dialog สำหรับยืนยันการกระทำสำคัญ (ลบ, ยกเลิก, etc.)
- * แทนการใช้ window.confirm() ที่ดูไม่สวยและปรับแต่งไม่ได้
- * รองรับ async operations และ custom styling
+ * หน้าที่:
+ * - Dialog สำหรับยืนยันการกระทำ แทน window.confirm()
+ * - รองรับ async operations + Promise pattern
+ * - ใช้ Context API + custom hook (useConfirm)
  * 
- * 🎯 วิธีใช้งาน:
- * 1. ใน app/layout.js: wrap ด้วย <ConfirmDialogProvider>
- * 2. ใน component: const { confirm } = useConfirm()
- * 3. เรียก: const ok = await confirm('ลบสูตรนี้?', 'ไม่สามารถย้อนกลับได้')
- * 4. if (ok) { ... delete ... }
+ * Components ที่ใช้:
+ * - Material-UI Dialog, Button
  * 
- * 💡 Tips สำหรับการ implement:
- * 1. ใช้ Promise pattern เพื่อ await ได้
- * 2. สร้าง Context + Provider
- * 3. confirm() function return Promise<boolean>
- * 4. ปุ่ม confirm ควรเป็นสีแดงถ้าเป็น dangerous action
- * 5. รองรับ loading state ระหว่างทำงาน async
+ * ถูกเรียกใช้โดย:
+ * - NotesSection (ลบ note)
+ * - app/recipes/[id]/page.js (ลบสูตร)
+ * - app/layout.js (ต้อง wrap ด้วย ConfirmDialogProvider)
  * 
- * 📦 ตัวอย่างโค้ด:
- * ```jsx
- * const { confirm } = useConfirm()
- * 
- * const handleDelete = async () => {
- *   const confirmed = await confirm(
- *     'ลบสูตรนี้?',
- *     'การกระทำนี้ไม่สามารถย้อนกลับได้'
- *   )
- *   
- *   if (confirmed) {
- *     await deleteRecipe(id)
- *     showToast('ลบสูตรสำเร็จ', 'success')
- *   }
- * }
- * ```
- * 
- * ⚠️ สิ่งที่ต้องระวัง:
- * - ต้อง wrap ด้วย Provider ก่อนใช้ useConfirm()
- * - อย่าลืม await - ไม่งั้นจะไม่รอ user ตอบ
- * - ควร disable ปุ่มระหว่าง loading
+ * TODO List:
+ * - [ ] สร้าง ConfirmContext
+ * - [ ] สร้าง ConfirmDialogProvider component
+ * - [ ] สร้าง useConfirm() custom hook
+ * - [ ] สร้าง ConfirmDialog component ด้วย Promise pattern
+ * - [ ] Wrap ด้วย ConfirmDialogProvider ใน app/layout.js
+ * - [ ] แทน confirm() ทั้งหมดด้วย await confirm()
+ * - [ ] เพิ่ม dangerous action styling (ปุ่มสีแดง)
  * ========================================
  */
 
@@ -53,11 +35,6 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-
-// TODO: 🟢 สร้าง ConfirmDialog Context
-// - createContext สำหรับ share dialog state
-// - export ConfirmDialogProvider wrapper
-// - export useConfirm() hook สำหรับเรียกใช้
 
 const ConfirmDialogContext = createContext(null)
 

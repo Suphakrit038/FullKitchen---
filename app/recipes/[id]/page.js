@@ -1,3 +1,34 @@
+/**
+ * ========================================
+ * app/recipes/[id]/page.js - หน้ารายละเอียดสูตร (Recipe Detail)
+ * Route: /recipes/:id
+ * ========================================
+ * 
+ * หน้าที่:
+ * - แสดงรายละเอียดสูตรแบบเต็ม (route: /recipes/:id)
+ * - ส่วนผสม, ขั้นตอน, notes, metadata
+ * - ปุ่ม edit/delete
+ * 
+ * Components ที่ใช้:
+ * - NotesSection: จัดการ notes ในสูตร
+ * 
+ * ถูกเรียกใช้โดย:
+ * - RecipeCard (คลิกที่การ์ด)
+ * - RecipeList (คลิกที่สูตร)
+ * 
+ * Service ที่เรียกใช้:
+ * - getRecipeById(): ดึงข้อมูลสูตร
+ * - deleteRecipe(): ลบสูตร
+ * 
+ * TODO List:
+ * - [ ] แทน console.error ด้วย Toast
+ * - [ ] แทน confirm() และ alert() ด้วย ConfirmDialog
+ * - [ ] เพิ่ม loading skeleton
+ * - [ ] เพิ่ม print button
+ * - [ ] เพิ่ม share button
+ * ========================================
+ */
+
 "use client"
 import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
@@ -15,8 +46,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
-import { getRecipeById, deleteRecipe } from '../../../lib/recipes'
-import { formatDate } from '../../../lib/utils'
+import { getRecipeById, deleteRecipe } from '../../../lib/api'
+import { formatDate } from '../../../lib/utils.client'
 import NotesSection from '../../../components/NotesSection'
 
 export default function RecipeDetailPage() {
