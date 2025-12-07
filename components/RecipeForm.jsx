@@ -1,3 +1,38 @@
+/**
+ * ========================================
+ * components/RecipeForm.jsx - Add/Edit Recipe Form
+ * ========================================
+ * 
+ * 📝 คำอธิบาย:
+ * Form component สำหรับเพิ่มหรือแก้ไขสูตรอาหาร
+ * รองรับทั้ง mode="add" และ mode="edit"
+ * มีระบบ validation, auto-save draft, dynamic arrays
+ * 
+ * 🎯 Fields:
+ * - ชื่อเมนู (required)
+ * - ส่วนผสม (array - dynamic add/remove)
+ * - ขั้นตอน (array - dynamic add/remove)
+ * - tags (array - add by enter key)
+ * - เวลาเตรียม (นาที)
+ * - เวลาทำ (นาที)
+ * - ระดับความยาก (dropdown)
+ * 
+ * 💡 Tips สำหรับพัฒนาต่อ:
+ * 1. เพิ่ม thumbnail field (image upload)
+ * 2. แทน alert() ด้วย Toast notifications
+ * 3. เพิ่ม rich text editor สำหรับขั้นตอน
+ * 4. เพิ่ม ingredient suggestions (autocomplete)
+ * 5. เพิ่ม drag-to-reorder สำหรับขั้นตอน
+ * 6. เพิ่ม preview mode ก่อน save
+ * 
+ * ⚠️ สิ่งที่ต้องระวัง:
+ * - auto-save ไปยัง localStorage ทุกครั้งที่ formData เปลี่ยน (อาจช้า)
+ * - ไม่มี unsaved changes warning เมื่อออกจากหน้า
+ * - validation แค่ฝั่ง client - ต้อง validate server side ด้วย
+ * - arrays เปล่าจะผ่าน validation (ควรเช็ค length > 0)
+ * ========================================
+ */
+
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -28,6 +63,7 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
     prepTime: '',
     cookTime: '',
     difficulty: 'ปานกลาง'
+    // TODO: เพิ่ม thumbnail field สำหรับอัปโหลดรูป
   })
   const [tagInput, setTagInput] = useState('')
   const [errors, setErrors] = useState({})
@@ -144,14 +180,17 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
 
       if (mode === 'edit' && recipe) {
         await updateRecipe(recipe.id, recipeData)
+        // TODO: แสดง success Toast
         router.push(`/recipes/${recipe.id}`)
       } else {
         const newRecipe = await addRecipe(recipeData)
         localStorage.removeItem('recipe-draft')
+        // TODO: แสดง success Toast
         router.push(`/recipes/${newRecipe.id}`)
       }
     } catch (error) {
       console.error('Error saving recipe:', error)
+      // TODO: แสดง error Toast แทน error state
       setErrors({ submit: error.message || 'เกิดข้อผิดพลาดในการบันทึก' })
     } finally {
       setLoading(false)

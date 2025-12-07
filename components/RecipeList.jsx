@@ -32,6 +32,9 @@ export default function RecipeList() {
       )
       setFilteredRecipes(filtered)
     }
+    // TODO: เพิ่ม Sort dropdown (เรียงตามชื่อ, วันที่, เวลา)
+    // TODO: เพิ่ม Filter by tags (Chip selection)
+    // TODO: เพิ่ม Filter by difficulty
   }, [searchQuery, recipes])
 
   async function loadRecipes() {
@@ -42,6 +45,8 @@ export default function RecipeList() {
       setFilteredRecipes(data)
     } catch (error) {
       console.error('Error loading recipes:', error)
+      // TODO: แสดง error message แทน console.error
+      // TODO: เพิ่ม retry button
     } finally {
       setLoading(false)
     }

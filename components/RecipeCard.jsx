@@ -1,3 +1,35 @@
+/**
+ * ========================================
+ * components/RecipeCard.jsx - Recipe Preview Card
+ * ========================================
+ * 
+ * 📝 คำอธิบาย:
+ * Card component สำหรับแสดงสูตรอาหารในรูปแบบย่อ
+ * ใช้ใน RecipeList เป็น grid layout
+ * คลิกที่ card จะไปหน้ารายละเอียดสูตร
+ * 
+ * 🎯 ข้อมูลที่แสดง:
+ * - ชื่อสูตร
+ * - เวลาเตรียม + เวลาทำ (รวม)
+ * - ระดับความยาก
+ * - tags
+ * - จำนวนส่วนผสม
+ * - timeAgo (สร้างเมื่อ)
+ * 
+ * 💡 Tips สำหรับพัฒนาต่อ:
+ * 1. เพิ่ม thumbnail image
+ * 2. เพิ่ม rating stars (ถ้ามี rating system)
+ * 3. เพิ่ม favorite button (bookmark)
+ * 4. เพิ่ม hover animation ที่สวยขึ้น
+ * 5. เพิ่ม quick actions (edit, delete) บน card
+ * 
+ * ⚠️ สิ่งที่ต้องระวัง:
+ * - ชื่อสูตรยาวเกินไปจะทำให้ card สูงไม่เท่ากัน
+ * - tags เยอะเกินไปจะล้น - ควรจำกัดแสดงแค่ 3 tags
+ * - ไม่มี loading skeleton - ควรเพิ่ม placeholder
+ * ========================================
+ */
+
 "use client"
 import React from 'react'
 import Link from 'next/link'

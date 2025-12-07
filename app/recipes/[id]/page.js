@@ -39,19 +39,24 @@ export default function RecipeDetailPage() {
       setRecipe(data)
     } catch (error) {
       console.error('Error loading recipe:', error)
+      // TODO: แสดง Toast notification แทน console.error
+      // TODO: เพิ่ม Error Boundary สำหรับจัดการ error
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async () => {
+    // TODO: ใช้ ConfirmDialog component แทน confirm()
     if (!confirm('แน่ใจว่าต้องการลบสูตรนี้หรือไม่?')) return
 
     try {
       await deleteRecipe(recipe.id)
+      // TODO: แสดง success Toast แทน redirect ตรง
       router.push('/')
     } catch (error) {
       console.error('Error deleting recipe:', error)
+      // TODO: แสดง error Toast แทน alert()
       alert('เกิดข้อผิดพลาดในการลบ')
     }
   }
