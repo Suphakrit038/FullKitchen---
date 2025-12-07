@@ -40,13 +40,66 @@
 // - link ไป /recipes?category=xxx
 
 "use client"
-import React from 'react'
-import RecipeList from '../components/RecipeList'
+import React, { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
+import Grid from '@mui/material/Grid'
+import SidebarFilters from '../components/SidebarFilters'
+import MainContentHeader from '../components/MainContentHeader'
+import EnhancedRecipeCard from '../components/EnhancedRecipeCard'
+import FloatingActions from '../components/FloatingActions'
+import { getAllRecipes } from '../lib/api'
+import CircularProgress from '@mui/material/CircularProgress'
 
 export default function HomePage() {
+  const [recipes, setRecipes] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadRecipes()
+  }, [])
+
+  async function loadRecipes() {
+    try {
+      const data = await getAllRecipes({ sort: 'newest' })
+      setRecipes(data)
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
   return (
-    <main>
-      <RecipeList />
-    </main>
+    <>
+      <Box sx={{ display: 'flex', gap: 3, py: 3 }}>
+        {/* Sidebar */}
+        <Box sx={{ width: 280, flexShrink: 0, display: { xs: 'none', md: 'block' } }}>
+          <SidebarFilters onFilterChange={(filters) => console.log(filters)} />
+        </Box>
+
+        {/* Main Content */}
+        <Box sx={{ flexGrow: 1 }}>
+          <MainContentHeader recipeCount={recipes.length} />
+          
+          <Grid container spacing={3}>
+            {recipes.map((recipe) => (
+              <Grid item xs={12} sm={6} lg={4} key={recipe.id}>
+                <EnhancedRecipeCard recipe={recipe} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      </Box>
+
+      <FloatingActions />
+    </>
   )
 }

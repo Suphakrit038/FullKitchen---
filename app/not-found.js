@@ -49,30 +49,7 @@ import SearchOffIcon from '@mui/icons-material/SearchOff'
 
 export default function NotFound() {
   // TODO: 🟢 implement NotFound component
-  // return (
-  //   <Box
-  //     sx={{
-  //       display: 'flex',
-  //       flexDirection: 'column',
-  //       justifyContent: 'center',
-  //       alignItems: 'center',
-  //       minHeight: '60vh',
-  //       textAlign: 'center',
-  //       gap: 2,
-  //       p: 3
-  //     }}
-  //   >
-  //     <SearchOffIcon sx={{ fontSize: 120, color: 'text.secondary', opacity: 0.5 }} />
-  //     <Typography variant="h3" fontWeight="bold">404</Typography>
-  //     <Typography variant="h5">ไม่พบหน้าที่คุณกำลังมองหา</Typography>
-  //     <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
-  //       หน้าที่คุณพยายามเข้าถึงอาจถูกย้าย ลบ หรือไม่เคยมีอยู่จริง
-  //     </Typography>
-  //     <Button variant="contained" size="large" href="/" sx={{ mt: 2 }}>
-  //       กลับหน้าหลัก
-  //     </Button>
-  //   </Box>
-  // )
+
 
   return (
     <Box sx={{ textAlign: 'center', py: 8 }}>

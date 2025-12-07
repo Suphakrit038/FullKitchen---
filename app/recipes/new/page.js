@@ -25,7 +25,7 @@
 
 "use client"
 import React from 'react'
-import RecipeForm from '../../components/RecipeForm'
+import RecipeForm from '../../../components/RecipeForm'
 
 // TODO: เพิ่ม page header
 // - Typography variant="h4": "สร้างสูตรใหม่"

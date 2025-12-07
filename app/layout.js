@@ -104,15 +104,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="th">
       <body>
-        {/* TODO: 🟡 เพิ่ม ToastProvider wrapper */}
-        {/* TODO: 🟡 เพิ่ม ConfirmDialogProvider wrapper */}
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Header />
-          <Container maxWidth="lg" style={{ marginTop: 24 }}>
+          <Container 
+            maxWidth="xl" 
+            sx={{ 
+              px: { xs: 2, sm: 3, md: 4 },
+              minHeight: 'calc(100vh - 120px)'
+            }}
+          >
             {children}
           </Container>
-          {/* TODO: 🟢 เพิ่ม <Footer /> */}
         </ThemeProvider>
       </body>
     </html>
