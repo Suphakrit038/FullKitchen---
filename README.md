@@ -1,20 +1,41 @@
 # FullKitchen — Recipe Management App
 
-เว็บแอปจัดการสูตรอาหาร พัฒนาด้วย Next.js + React + JSON Database
+เว็บแอปจัดการสูตรอาหาร พัฒนาด้วย Next.js + React + Supabase (PostgreSQL)
 
-## เริ่มต้นใช้งาน
+## 🚀 Quick Start
 
-### 1. ติดตั้ง Dependencies
+### Development (Local JSON Database)
 ```bash
 npm install
-```
-
-### 2. รันโปรเจกต์
-```bash
 npm run dev
 ```
 
+### Production (Supabase Database)
+
+1. **ตั้งค่า Supabase** - อ่าน `SUPABASE_SETUP.md`
+2. **Deploy** - อ่าน `DEPLOY.md`
+
 เปิด [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 📊 Database Options
+
+### Option 1: JSON File (Development) - ใช้งานได้แล้ว ✅
+- ใช้ไฟล์ `data/db.json`
+- เหมาะสำหรับ development local
+- ไม่สามารถ deploy ไป Netlify/Vercel ได้
+
+### Option 2: Supabase (Production) - พร้อมใช้งาน 🆕
+- ใช้ PostgreSQL database
+- **ไฟล์ที่เกี่ยวข้อง:**
+  - `lib/supabase.js` - Client configuration
+  - `lib/recipes.supabase.js` - Business logic
+  - `supabase-schema.sql` - Database schema
+  - `scripts/migrate-to-supabase.js` - Migration script
+- **คู่มือ:** อ่าน `SUPABASE_SETUP.md`
+
+---
 
 ## โครงสร้างโปรเจกต์และหน้าที่ของไฟล์
 
