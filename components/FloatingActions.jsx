@@ -1,8 +1,10 @@
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import Box from '@mui/material/Box'
 import Fab from '@mui/material/Fab'
-import Tooltip from '@mui/material/Tooltip'
+import SpeedDial from '@mui/material/SpeedDial'
+import SpeedDialAction from '@mui/material/SpeedDialAction'
+import SpeedDialIcon from '@mui/material/SpeedDialIcon'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import SearchIcon from '@mui/icons-material/Search'
@@ -10,58 +12,43 @@ import { useRouter } from 'next/navigation'
 
 export default function FloatingActions() {
   const router = useRouter()
+  const [open, setOpen] = useState(false)
+
+  const actions = [
+    { icon: <AddIcon />, name: 'เพิ่มสูตรใหม่', action: () => router.push('/recipes/new') },
+    { icon: <EditIcon />, name: 'แก้ไขสูตร', action: () => console.log('Edit') },
+    { icon: <SearchIcon />, name: 'ค้นหา', action: () => document.getElementById('header-search')?.focus() }
+  ]
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        bottom: 24,
+    <SpeedDial
+      ariaLabel="Quick actions"
+      sx={{ 
+        position: 'fixed', 
+        bottom: 24, 
         right: 24,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        zIndex: 1000
+        '& .MuiFab-primary': {
+          bgcolor: 'primary.main',
+          '&:hover': { bgcolor: 'primary.dark' }
+        }
       }}
+      icon={<SpeedDialIcon />}
+      onClose={() => setOpen(false)}
+      onOpen={() => setOpen(true)}
+      open={open}
     >
-      <Tooltip title="เพิ่มสูตรใหม่" placement="left">
-        <Fab 
-          color="primary" 
-          size="medium"
-          onClick={() => router.push('/recipes/new')}
-          sx={{ 
-            bgcolor: 'primary.main',
-            '&:hover': { bgcolor: 'primary.dark' }
+      {actions.map((action) => (
+        <SpeedDialAction
+          key={action.name}
+          icon={action.icon}
+          tooltipTitle={action.name}
+          tooltipOpen
+          onClick={() => {
+            action.action()
+            setOpen(false)
           }}
-        >
-          <AddIcon />
-        </Fab>
-      </Tooltip>
-
-      <Tooltip title="แก้ไขสูตร" placement="left">
-        <Fab 
-          size="small"
-          sx={{ 
-            bgcolor: 'grey.700',
-            color: 'white',
-            '&:hover': { bgcolor: 'grey.800' }
-          }}
-        >
-          <EditIcon fontSize="small" />
-        </Fab>
-      </Tooltip>
-
-      <Tooltip title="ค้นหา" placement="left">
-        <Fab 
-          size="small"
-          sx={{ 
-            bgcolor: 'grey.700',
-            color: 'white',
-            '&:hover': { bgcolor: 'grey.800' }
-          }}
-        >
-          <SearchIcon fontSize="small" />
-        </Fab>
-      </Tooltip>
-    </Box>
+        />
+      ))}
+    </SpeedDial>
   )
 }

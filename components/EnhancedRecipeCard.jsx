@@ -16,13 +16,11 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import FlagIcon from '@mui/icons-material/Flag'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { timeAgo } from '../lib/utils.client'
 
 export default function EnhancedRecipeCard({ recipe }) {
   const [bookmarked, setBookmarked] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
-
   const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0)
 
   return (
@@ -51,7 +49,7 @@ export default function EnhancedRecipeCard({ recipe }) {
           sx={{
             color: '#FFD700',
             fontSize: 28,
-            filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.4))',
+            filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.4))'
           }}
         />
       </Box>
@@ -87,7 +85,6 @@ export default function EnhancedRecipeCard({ recipe }) {
           <img src={recipe.thumbnail} alt={recipe.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h3" sx={{ opacity: 0.3, mb: 1 }}>🍳</Typography>
             <Typography variant="caption" color="text.secondary">ไม่มีรูปภาพ</Typography>
           </Box>
         )}
@@ -95,43 +92,58 @@ export default function EnhancedRecipeCard({ recipe }) {
 
       <CardContent sx={{ flexGrow: 1, pb: 1 }}>
         <Typography 
-          variant="h6" 
+          variant="h5" 
           gutterBottom 
           noWrap 
           sx={{ 
-            fontWeight: 600,
-            color: 'primary.main',
-            mb: 1
+            fontWeight: 700,
+            fontSize: '22px',
+            color: 'text.primary',
+            mb: 1.5,
+            lineHeight: 1.3
           }}
         >
           {recipe.name}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '0.813rem' }}>
-          👨‍🍳 ทำง่าย สะอาด อร่อย
-        </Typography>
-
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-          {new Date(recipe.createdAt).toLocaleDateString('th-TH', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit' 
-          }).split('/').join('/')} – V{recipe.version || '5.9'}
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ 
+            mb: 1.5, 
+            fontSize: '14px',
+            lineHeight: 1.5,
+            fontWeight: 400
+          }}
+        >
+          {recipe.ingredients?.length || 0} วัตถุดิบ • {recipe.steps?.length || 0} ขั้นตอน • {(recipe.prepTime || 0) + (recipe.cookTime || 0)} นาที
         </Typography>
 
         {recipe.tags && recipe.tags.length > 0 && (
           <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
-            {recipe.tags.slice(0, 5).map((tag, i) => (
+            {recipe.tags.slice(0, 4).map((tag, i) => (
               <Chip 
                 key={i} 
                 label={tag} 
-                size="small" 
+                size="small"
+                clickable
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.dispatchEvent(new CustomEvent('filterByTag', { detail: tag }))
+                }}
                 sx={{ 
-                  bgcolor: i === 0 ? '#e3f2fd' : i === 1 ? '#f3e5f5' : i === 2 ? '#fff3e0' : '#f1f8e9',
-                  color: 'text.primary',
-                  fontSize: '0.75rem',
-                  height: 22,
-                  '& .MuiChip-label': { px: 1 }
+                  fontSize: '12px',
+                  height: 24,
+                  bgcolor: 'grey.100',
+                  color: 'text.secondary',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    transform: 'scale(1.05)'
+                  },
+                  '& .MuiChip-label': { px: 1.5 }
                 }}
               />
             ))}
@@ -139,16 +151,23 @@ export default function EnhancedRecipeCard({ recipe }) {
         )}
       </CardContent>
 
-      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2, pt: 0 }}>
         <Button
-          size="small"
+          size="medium"
           component={Link}
           href={`/recipes/${recipe.id}`}
           variant="contained"
           fullWidth
-          sx={{ mr: 1 }}
+          sx={{ 
+            fontWeight: 600,
+            fontSize: '15px',
+            py: 1,
+            textTransform: 'none',
+            boxShadow: 2,
+            mr: 1
+          }}
         >
-          ดูสูตร
+          เริ่มทำเลย
         </Button>
         <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
           <MoreVertIcon />

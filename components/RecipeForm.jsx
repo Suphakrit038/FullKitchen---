@@ -1,38 +1,3 @@
-/**
- * ========================================
- * components/RecipeForm.jsx - ฟอร์มเพิ่ม/แก้ไขสูตร (Add/Edit Recipe Form)
- * ========================================
- * 
- * 📝 คำอธิบาย:
- * Form component สำหรับเพิ่มหรือแก้ไขสูตรอาหาร
- * รองรับทั้ง mode="add" และ mode="edit"
- * มีระบบ validation, auto-save draft, dynamic arrays
- * 
- * 🎯 Fields:
- * - ชื่อเมนู (required)
- * - ส่วนผสม (array - dynamic add/remove)
- * - ขั้นตอน (array - dynamic add/remove)
- * - tags (array - add by enter key)
- * - เวลาเตรียม (นาที)
- * - เวลาทำ (นาที)
- * - ระดับความยาก (dropdown)
- * 
- * 💡 Tips สำหรับพัฒนาต่อ:
- * 1. เพิ่ม thumbnail field (image upload)
- * 2. แทน alert() ด้วย Toast notifications
- * 3. เพิ่ม rich text editor สำหรับขั้นตอน
- * 4. เพิ่ม ingredient suggestions (autocomplete)
- * 5. เพิ่ม drag-to-reorder สำหรับขั้นตอน
- * 6. เพิ่ม preview mode ก่อน save
- * 
- * ⚠️ สิ่งที่ต้องระวัง:
- * - auto-save ไปยัง localStorage ทุกครั้งที่ formData เปลี่ยน (อาจช้า)
- * - ไม่มี unsaved changes warning เมื่อออกจากหน้า
- * - validation แค่ฝั่ง client - ต้อง validate server side ด้วย
- * - arrays เปล่าจะผ่าน validation (ควรเช็ค length > 0)
- * ========================================
- */
-
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -47,41 +12,58 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
+import Autocomplete from '@mui/material/Autocomplete'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
-import { addRecipe, updateRecipe } from '../lib/api'
+import { addRecipe, updateRecipe, getAllRecipes } from '../lib/api'
 
 export default function RecipeForm({ recipe = null, mode = 'add' }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
-    ingredients: [''],
+    ingredients: [{ name: '', amount: '', unit: '' }],
     steps: [''],
+    equipment: [''],
     tags: [],
     prepTime: '',
     cookTime: '',
-    difficulty: 'ปานกลาง'
-    // TODO: เพิ่ม thumbnail field สำหรับอัปโหลดรูป
+    difficulty: 'ปานกลาง',
+    thumbnail: '',
+    images: []
   })
-  const [tagInput, setTagInput] = useState('')
   const [errors, setErrors] = useState({})
+  const [suggestions, setSuggestions] = useState({
+    ingredientNames: [],
+    units: [],
+    equipment: [],
+    tags: []
+  })
 
   useEffect(() => {
     if (recipe) {
       setFormData({
         name: recipe.name || '',
-        ingredients: recipe.ingredients || [''],
+        ingredients: recipe.ingredients?.length > 0 
+          ? recipe.ingredients.map(ing => {
+              if (typeof ing === 'string') {
+                return { name: ing, amount: '', unit: '' }
+              }
+              return { name: ing.name || '', amount: ing.amount || '', unit: ing.unit || '' }
+            })
+          : [{ name: '', amount: '', unit: '' }],
         steps: recipe.steps || [''],
+        equipment: recipe.equipment || [''],
         tags: recipe.tags || [],
         prepTime: recipe.prepTime || '',
         cookTime: recipe.cookTime || '',
-        difficulty: recipe.difficulty || 'ปานกลาง'
+        difficulty: recipe.difficulty || 'ปานกลาง',
+        thumbnail: recipe.thumbnail || '',
+        images: recipe.images || []
       })
     }
 
-    // Load from localStorage if adding new recipe
     if (mode === 'add' && !recipe) {
       const draft = localStorage.getItem('recipe-draft')
       if (draft) {
@@ -93,9 +75,45 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
         }
       }
     }
+
+    async function loadSuggestions() {
+      try {
+        const recipes = await getAllRecipes()
+        const allIngredientNames = new Set()
+        const allUnits = new Set()
+        const allEquipment = new Set()
+        const allTags = new Set()
+
+        recipes.forEach(r => {
+          r.ingredients?.forEach(ing => {
+            if (typeof ing === 'string') {
+              allIngredientNames.add(ing)
+            } else {
+              if (ing.name) allIngredientNames.add(ing.name)
+              if (ing.unit) allUnits.add(ing.unit)
+            }
+          })
+          r.equipment?.forEach(e => allEquipment.add(e))
+          r.tags?.forEach(t => allTags.add(t))
+        })
+
+        const commonUnits = ['กรัม', 'กิโลกรัม', 'ลิตร', 'มิลลิลิตร', 'ช้อนโต๊ะ', 'ช้อนชา', 'ถ้วย', 'ฟอง', 'แผ่น', 'ชิ้น', 'หัว', 'เส้น', 'ใบ', 'กิ่ง', 'ซอง', 'ขีด']
+        commonUnits.forEach(u => allUnits.add(u))
+
+        setSuggestions({
+          ingredientNames: Array.from(allIngredientNames).sort(),
+          units: Array.from(allUnits).sort(),
+          equipment: Array.from(allEquipment).sort(),
+          tags: Array.from(allTags).sort()
+        })
+      } catch (error) {
+        console.error('Failed to load suggestions:', error)
+      }
+    }
+
+    loadSuggestions()
   }, [recipe, mode])
 
-  // Auto-save draft
   useEffect(() => {
     if (mode === 'add' && formData.name) {
       localStorage.setItem('recipe-draft', JSON.stringify(formData))
@@ -115,8 +133,18 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
     handleChange(field, newArray)
   }
 
+  const handleIngredientChange = (index, field, value) => {
+    const newIngredients = [...formData.ingredients]
+    newIngredients[index] = { ...newIngredients[index], [field]: value }
+    handleChange('ingredients', newIngredients)
+  }
+
   const addArrayItem = (field) => {
-    handleChange(field, [...formData[field], ''])
+    if (field === 'ingredients') {
+      handleChange(field, [...formData[field], { name: '', amount: '', unit: '' }])
+    } else {
+      handleChange(field, [...formData[field], ''])
+    }
   }
 
   const removeArrayItem = (field, index) => {
@@ -126,15 +154,29 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
     }
   }
 
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      handleChange('tags', [...formData.tags, tagInput.trim()])
-      setTagInput('')
+  const handleImageUrlAdd = () => {
+    if (formData.images.length === 0) {
+      handleChange('images', [''])
+    } else {
+      handleChange('images', [...formData.images, ''])
     }
   }
 
-  const removeTag = (tagToRemove) => {
-    handleChange('tags', formData.tags.filter(tag => tag !== tagToRemove))
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const files = Array.from(e.dataTransfer.files)
+    const imageFiles = files.filter(file => file.type.startsWith('image/'))
+    
+    if (imageFiles.length > 0) {
+      alert('การอัปโหลดรูปภาพต้องการ backend service\nกรุณาใช้ URL แทนในตอนนี้')
+    }
   }
 
   const validate = () => {
@@ -146,7 +188,7 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
       newErrors.name = 'ชื่อเมนูต้องมีอย่างน้อย 2 ตัวอักษร'
     }
 
-    const validIngredients = formData.ingredients.filter(i => i.trim())
+    const validIngredients = formData.ingredients.filter(i => i.name.trim())
     if (validIngredients.length === 0) {
       newErrors.ingredients = 'กรุณาระบุส่วนผสมอย่างน้อย 1 รายการ'
     }
@@ -154,6 +196,11 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
     const validSteps = formData.steps.filter(s => s.trim())
     if (validSteps.length === 0) {
       newErrors.steps = 'กรุณาระบุขั้นตอนอย่างน้อย 1 ขั้นตอน'
+    }
+
+    const validEquipment = formData.equipment.filter(e => e.trim())
+    if (validEquipment.length === 0) {
+      newErrors.equipment = 'กรุณาระบุอุปกรณ์อย่างน้อย 1 รายการ'
     }
 
     setErrors(newErrors)
@@ -172,25 +219,29 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
 
       const recipeData = {
         ...formData,
-        ingredients: formData.ingredients.filter(i => i.trim()),
+        ingredients: formData.ingredients
+          .filter(i => i.name.trim())
+          .map(i => ({
+            name: i.name.trim(),
+            amount: i.amount.trim(),
+            unit: i.unit.trim()
+          })),
         steps: formData.steps.filter(s => s.trim()),
+        equipment: formData.equipment.filter(e => e.trim()),
         prepTime: parseInt(formData.prepTime) || 0,
         cookTime: parseInt(formData.cookTime) || 0
       }
 
       if (mode === 'edit' && recipe) {
         await updateRecipe(recipe.id, recipeData)
-        // TODO: แสดง success Toast
         router.push(`/recipes/${recipe.id}`)
       } else {
         const newRecipe = await addRecipe(recipeData)
         localStorage.removeItem('recipe-draft')
-        // TODO: แสดง success Toast
         router.push(`/recipes/${newRecipe.id}`)
       }
     } catch (error) {
       console.error('Error saving recipe:', error)
-      // TODO: แสดง error Toast แทน error state
       setErrors({ submit: error.message || 'เกิดข้อผิดพลาดในการบันทึก' })
     } finally {
       setLoading(false)
@@ -202,6 +253,123 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
         {mode === 'edit' ? 'แก้ไขสูตร' : 'เพิ่มสูตรใหม่'}
       </Typography>
+
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>รูปภาพ</Typography>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            รูปหลัก (Thumbnail)
+          </Typography>
+          <TextField
+            fullWidth
+            label="URL รูปหลัก"
+            value={formData.thumbnail}
+            onChange={(e) => handleChange('thumbnail', e.target.value)}
+            placeholder="https://example.com/image.jpg"
+            helperText="ใส่ URL ของรูปภาพหลักที่ต้องการแสดง"
+          />
+          {formData.thumbnail && (
+            <Box sx={{ mt: 2 }}>
+              <img 
+                src={formData.thumbnail} 
+                alt="Preview" 
+                style={{ 
+                  width: '100%', 
+                  maxHeight: 300, 
+                  objectFit: 'cover', 
+                  borderRadius: 8 
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            รูปเพิ่มเติม (ไม่บังคับ)
+          </Typography>
+          
+          <Box
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            sx={{
+              border: '2px dashed #ccc',
+              borderRadius: 2,
+              p: 4,
+              mb: 2,
+              textAlign: 'center',
+              bgcolor: '#f9f9f9',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+              '&:hover': {
+                borderColor: '#1976d2',
+                bgcolor: '#f0f7ff'
+              }
+            }}
+          >
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+              🖼️ ลากและวางรูปภาพที่นี่
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              หรือใส่ URL ด้านล่าง
+            </Typography>
+          </Box>
+
+          {formData.images.map((image, index) => (
+            <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <TextField
+                fullWidth
+                label={`URL รูปที่ ${index + 1}`}
+                value={image}
+                onChange={(e) => handleArrayChange('images', index, e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+              {image && (
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                    flexShrink: 0
+                  }}
+                >
+                  <img
+                    src={image}
+                    alt={`Preview ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                    }}
+                  />
+                </Box>
+              )}
+              <IconButton
+                color="error"
+                onClick={() => removeArrayItem('images', index)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
+          <Button
+            startIcon={<AddIcon />}
+            onClick={handleImageUrlAdd}
+            variant="outlined"
+            size="small"
+          >
+            เพิ่มรูปภาพ
+          </Button>
+        </Box>
+      </Paper>
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>ข้อมูลพื้นฐาน</Typography>
@@ -255,17 +423,51 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
           </Typography>
         )}
         {formData.ingredients.map((ingredient, index) => (
-          <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2 }}>
+          <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'flex-start' }}>
+            <Autocomplete
+              freeSolo
+              sx={{ flex: 2 }}
+              options={suggestions.ingredientNames}
+              value={ingredient.name}
+              onInputChange={(event, newValue) => {
+                handleIngredientChange(index, 'name', newValue || '')
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="ชื่อวัตถุดิบ"
+                  placeholder="เช่น ไข่, น้ำตาล"
+                />
+              )}
+            />
             <TextField
-              fullWidth
-              label={`ส่วนผสม ${index + 1}`}
-              value={ingredient}
-              onChange={(e) => handleArrayChange('ingredients', index, e.target.value)}
+              sx={{ flex: 1 }}
+              label="จำนวน"
+              value={ingredient.amount}
+              onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
+              placeholder="2"
+            />
+            <Autocomplete
+              freeSolo
+              sx={{ flex: 1 }}
+              options={suggestions.units}
+              value={ingredient.unit}
+              onInputChange={(event, newValue) => {
+                handleIngredientChange(index, 'unit', newValue || '')
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="หน่วย"
+                  placeholder="ฟอง, กรัม"
+                />
+              )}
             />
             <IconButton
               color="error"
               onClick={() => removeArrayItem('ingredients', index)}
               disabled={formData.ingredients.length === 1}
+              sx={{ mt: 1 }}
             >
               <DeleteIcon />
             </IconButton>
@@ -277,6 +479,48 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
           variant="outlined"
         >
           เพิ่มส่วนผสม
+        </Button>
+      </Paper>
+
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>อุปกรณ์ในการทำอาหาร</Typography>
+        {errors.equipment && (
+          <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+            {errors.equipment}
+          </Typography>
+        )}
+        {formData.equipment.map((item, index) => (
+          <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <Autocomplete
+              freeSolo
+              fullWidth
+              options={suggestions.equipment}
+              value={item}
+              onInputChange={(event, newValue) => {
+                handleArrayChange('equipment', index, newValue || '')
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={`อุปกรณ์ ${index + 1}`}
+                />
+              )}
+            />
+            <IconButton
+              color="error"
+              onClick={() => removeArrayItem('equipment', index)}
+              disabled={formData.equipment.length === 1}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        ))}
+        <Button
+          startIcon={<AddIcon />}
+          onClick={() => addArrayItem('equipment')}
+          variant="outlined"
+        >
+          เพิ่มอุปกรณ์
         </Button>
       </Paper>
 
@@ -317,32 +561,35 @@ export default function RecipeForm({ recipe = null, mode = 'add' }) {
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>แท็ก</Typography>
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <TextField
-            fullWidth
-            label="เพิ่มแท็ก"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                addTag()
-              }
-            }}
-          />
-          <Button onClick={addTag} variant="outlined">เพิ่ม</Button>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {formData.tags.map((tag, index) => (
-            <Chip
-              key={index}
-              label={tag}
-              onDelete={() => removeTag(tag)}
-              color="primary"
-              variant="outlined"
+        
+        <Autocomplete
+          multiple
+          freeSolo
+          options={suggestions.tags}
+          value={formData.tags}
+          onChange={(event, newValue) => {
+            handleChange('tags', newValue)
+          }}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip
+                key={index}
+                label={option}
+                {...getTagProps({ index })}
+                color="primary"
+                variant="outlined"
+              />
+            ))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="เพิ่มแท็ก"
+              placeholder="พิมพ์และกด Enter หรือเลือกจากรายการ"
+              helperText="สามารถเลือกหลายแท็กได้ หรือพิมพ์ใหม่"
             />
-          ))}
-        </Box>
+          )}
+        />
       </Paper>
 
       {errors.submit && (

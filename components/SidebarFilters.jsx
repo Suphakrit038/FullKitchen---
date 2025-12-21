@@ -12,31 +12,33 @@ import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import Button from '@mui/material/Button'
 
-export default function SidebarFilters({ onFilterChange }) {
-  const [category, setCategory] = useState('ทานเล่น')
+export default function SidebarFilters({ onFilterChange, resultCount = 0 }) {
+  const [category, setCategory] = useState('')
   const [selectedTags, setSelectedTags] = useState([])
+  const [selectedCalories, setSelectedCalories] = useState([])
 
   const categories = [
-    { value: 'soup', label: 'ซุป', count: 6 },
-    { value: 'appetizer', label: 'ทานเล่น', count: 97 },
-    { value: 'dessert', label: 'ขนม', count: 4 },
-    { value: 'fish', label: 'ปลา', count: 111 },
-    { value: 'other', label: 'อื่นๆ', count: 8 }
+    { value: 'ข้าว', label: 'ข้าว' },
+    { value: 'ก๋วยเตี๋ยว', label: 'ก๋วยเตี๋ยว' },
+    { value: 'ของว่าง', label: 'ของว่าง' },
+    { value: 'เครื่องดื่ม', label: 'เครื่องดื่ม' },
+    { value: 'ซุป', label: 'ซุป' },
+    { value: 'สลัด', label: 'สลัด' }
   ]
 
   const calorieOptions = [
-    { label: '500cal and Under', count: 30 },
-    { label: '1000cal and Under', count: 16 },
-    { label: '2000cal and Upper', count: 92 }
+    { value: 'low', label: 'ต่ำกว่า 300 แคล' },
+    { value: 'medium', label: '300-600 แคล' },
+    { value: 'high', label: 'สูงกว่า 600 แคล' }
   ]
 
   const cookingTags = [
-    { value: 'ผัด', count: 15 },
-    { value: 'ต้ม', count: 14 },
-    { value: 'ปิ้ง', count: 15 },
-    { value: 'ทอด', count: 11 },
-    { value: 'นึ่ง', count: 8 },
-    { value: 'ย่าง', count: 12 }
+    { value: 'ผัด' },
+    { value: 'ต้ม' },
+    { value: 'ทอด' },
+    { value: 'ย่าง' },
+    { value: 'นึ่ง' },
+    { value: 'ปิ้ง' }
   ]
 
   const handleTagToggle = (tag) => {
@@ -44,114 +46,154 @@ export default function SidebarFilters({ onFilterChange }) {
       ? selectedTags.filter(t => t !== tag)
       : [...selectedTags, tag]
     setSelectedTags(newTags)
-    onFilterChange?.({ category, tags: newTags })
+    onFilterChange?.({ category, tags: newTags, calories: selectedCalories })
   }
 
-  const handleClear = () => {
+  const handleCalorieToggle = (cal) => {
+    const newCals = selectedCalories.includes(cal)
+      ? selectedCalories.filter(c => c !== cal)
+      : [...selectedCalories, cal]
+    setSelectedCalories(newCals)
+    onFilterChange?.({ category, tags: selectedTags, calories: newCals })
+  }
+
+  const handleCategoryChange = (cat) => {
+    setCategory(cat)
+    onFilterChange?.({ category: cat, tags: selectedTags, calories: selectedCalories })
+  }
+
+  const handleClearAll = () => {
     setCategory('')
     setSelectedTags([])
-    onFilterChange?.({ category: '', tags: [] })
+    setSelectedCalories([])
+    onFilterChange?.({ category: '', tags: [], calories: [] })
   }
+
+  const hasActiveFilters = category || selectedTags.length > 0 || selectedCalories.length > 0
 
   return (
     <Paper 
       elevation={2}
       sx={{ 
-        p: 2.5, 
+        p: 3, 
         position: 'sticky', 
         top: 90, 
         maxHeight: 'calc(100vh - 110px)', 
         overflow: 'auto',
-        bgcolor: '#f8f9fa'
+        bgcolor: 'white',
+        border: '1px solid',
+        borderColor: 'grey.200'
       }}
     >
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          fontWeight: 700, 
-          mb: 3,
-          color: 'text.secondary',
-          fontSize: '0.875rem',
-          textTransform: 'uppercase',
-          letterSpacing: 0.5
-        }}
-      >
-        Narrow Choices
-      </Typography>
-
-      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, fontSize: '0.875rem' }}>
-        ประเภท
-      </Typography>
-      <RadioGroup value={category} onChange={(e) => setCategory(e.target.value)}>
-        {categories.map((cat) => (
-          <FormControlLabel
-            key={cat.value}
-            value={cat.value}
-            control={<Radio size="small" />}
-            label={
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                <span>{cat.label}</span>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>({cat.count})</Typography>
-              </Box>
-            }
-            sx={{ mb: 0.5, '& .MuiFormControlLabel-label': { width: '100%' } }}
-          />
-        ))}
-      </RadioGroup>
-
-      <Divider sx={{ my: 2.5 }} />
-
-      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, fontSize: '0.875rem' }}>
-        แคลอรี่
-      </Typography>
-      {calorieOptions.map((opt) => (
-        <FormControlLabel
-          key={opt.label}
-          control={<Checkbox size="small" />}
-          label={
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.875rem' }}>{opt.label}</span>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>({opt.count})</Typography>
-            </Box>
-          }
-          sx={{ mb: 0.5, '& .MuiFormControlLabel-label': { width: '100%' } }}
-        />
-      ))}
-      <Box sx={{ px: 1, mt: 2 }}>
-        <Slider 
-          defaultValue={[0, 100]} 
-          size="small" 
-          valueLabelDisplay="auto"
-          marks={[
-            { value: 0, label: '0' },
-            { value: 100, label: '10,000' }
-          ]}
-        />
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 700, 
+            fontSize: '18px',
+            color: 'text.primary'
+          }}
+        >
+          ตัวกรอง
+        </Typography>
+        {hasActiveFilters && (
+          <Button 
+            size="small" 
+            onClick={handleClearAll}
+            sx={{ 
+              fontSize: '13px',
+              textTransform: 'none',
+              color: 'error.main',
+              minWidth: 'auto',
+              p: 0.5
+            }}
+          >
+            ล้างทั้งหมด
+          </Button>
+        )}
       </Box>
 
-      <Divider sx={{ my: 2.5 }} />
+      {resultCount > 0 && (
+        <Box sx={{ mb: 3, p: 2, bgcolor: 'primary.50', borderRadius: 1, border: '1px solid', borderColor: 'primary.200' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+            พบ {resultCount} เมนู
+          </Typography>
+        </Box>
+      )}
 
-      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, fontSize: '0.875rem' }}>
-        Tag #
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: '15px', color: 'text.primary' }}>
+        ประเภทอาหาร
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        {cookingTags.map((tag) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
+        {categories.map((cat) => (
+          <Button
+            key={cat.value}
+            variant={category === cat.value ? 'contained' : 'outlined'}
+            onClick={() => handleCategoryChange(cat.value)}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              fontSize: '14px',
+              fontWeight: category === cat.value ? 600 : 400,
+              py: 1,
+              px: 2,
+              borderColor: 'grey.300',
+              color: category === cat.value ? 'white' : 'text.primary',
+              '&:hover': {
+                bgcolor: category === cat.value ? 'primary.dark' : 'grey.50'
+              }
+            }}
+          >
+            {cat.label}
+          </Button>
+        ))}
+      </Box>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: '15px', color: 'text.primary' }}>
+        แคลอรี่
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 3 }}>
+        {calorieOptions.map((opt) => (
           <FormControlLabel
-            key={tag.value}
+            key={opt.value}
             control={
               <Checkbox 
                 size="small"
-                checked={selectedTags.includes(tag.value)}
-                onChange={() => handleTagToggle(tag.value)}
+                checked={selectedCalories.includes(opt.value)}
+                onChange={() => handleCalorieToggle(opt.value)}
               />
             }
-            label={
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.875rem' }}>{tag.value}</span>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>({tag.count})</Typography>
-              </Box>
-            }
-            sx={{ mb: 0.5, '& .MuiFormControlLabel-label': { width: '100%' } }}
+            label={<span style={{ fontSize: '14px' }}>{opt.label}</span>}
+            sx={{ mb: 0 }}
+          />
+        ))}
+      </Box>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: '15px', color: 'text.primary' }}>
+        วิธีทำ
+      </Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {cookingTags.map((tag) => (
+          <Chip
+            key={tag.value}
+            label={tag.value}
+            clickable
+            onClick={() => handleTagToggle(tag.value)}
+            color={selectedTags.includes(tag.value) ? 'primary' : 'default'}
+            variant={selectedTags.includes(tag.value) ? 'filled' : 'outlined'}
+            sx={{ 
+              fontSize: '14px',
+              fontWeight: selectedTags.includes(tag.value) ? 600 : 400,
+              height: 32,
+              transition: 'all 0.2s',
+              '&:hover': {
+                transform: 'scale(1.05)'
+              }
+            }}
           />
         ))}
       </Box>

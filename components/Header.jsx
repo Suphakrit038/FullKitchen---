@@ -29,81 +29,129 @@
  */
 
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import InputBase from '@mui/material/InputBase'
+import Box from '@mui/material/Box'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
-import AddIcon from '@mui/icons-material/Add'
-import HomeIcon from '@mui/icons-material/Home'
+import SearchIcon from '@mui/icons-material/Search'
 import Banner from './Banner'
 import UserProfilePanel from './UserProfilePanel'
 
-// TODO: 🟡 เพิ่ม search bar ใน Header
-// - แสดง search input ตรง Toolbar
-// - redirect ไป /recipes?q=searchQuery
-// - รองรับ mobile (hide/show with icon)
-
-// TODO: 🟢 เพิ่ม active state สำหรับ navigation
-// - highlight ปุ่มที่กำลังอยู่ในหน้านั้น
-// - ใช้ usePathname() from next/navigation
-// - เปลี่ยนสี/style ของปุ่ม active
-
-// TODO: 🟡 เพิ่ม user menu (ถ้ามี authentication)
-// - Avatar icon ที่มุมขวา
-// - dropdown menu: Profile, Settings, Logout
-// - แสดงชื่อ user
-
-// TODO: 🟢 เพิ่ม theme toggle (dark/light mode)
-// - IconButton สำหรับสลับ theme
-// - บันทึกค่าใน localStorage
-// - sync กับ ThemeProvider
-
 export default function Header() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
   return (
     <>
       <Banner />
       <AppBar position="sticky" elevation={2}>
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="logo"
-            sx={{ mr: 2 }}
-          >
-            <RestaurantIcon />
-          </IconButton>
-          
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            FullKitchen – ครัวครบครัน
-          </Typography>
+        <Toolbar 
+          sx={{ 
+            gap: 3,
+            maxWidth: '100%',
+            width: '100%',
+            px: { xs: 2, sm: 3, md: 4 },
+            minHeight: { xs: 70, sm: 80 }
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              component={Link}
+              href="/"
+              sx={{ p: 1.5 }}
+            >
+              <RestaurantIcon sx={{ fontSize: { xs: 32, sm: 38 } }} />
+            </IconButton>
+            
+            <Typography 
+              variant="h6" 
+              component={Link}
+              href="/"
+              sx={{ 
+                textDecoration: 'none',
+                color: 'inherit',
+                fontWeight: 700,
+                fontSize: { xs: '1.1rem', sm: '1.4rem' },
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              FullKitchen
+            </Typography>
+          </Box>
 
-          <Button 
-            color="inherit" 
-            component={Link} 
-            href="/"
-            startIcon={<HomeIcon />}
-            sx={{ mr: 1 }}
+          <Box
+            component="form"
+            onSubmit={handleSearch}
+            sx={{
+              position: 'relative',
+              borderRadius: 1,
+              bgcolor: 'rgba(255, 255, 255, 0.15)',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' },
+              flexGrow: 1,
+              maxWidth: 600,
+              display: 'flex',
+              alignItems: 'center',
+              mx: 'auto'
+            }}
           >
-            หน้าหลัก
-          </Button>
+            <Box sx={{ p: 1, pl: 2, pointerEvents: 'none', display: 'flex' }}>
+              <SearchIcon />
+            </Box>
+            <InputBase
+              id="header-search"
+              placeholder="ค้นหาสูตรอาหาร..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{
+                color: 'inherit',
+                width: '100%',
+                '& input': {
+                  py: 1,
+                  pr: 2,
+                  width: '100%',
+                  fontSize: '14px'
+                }
+              }}
+            />
+          </Box>
 
-          <Button 
-            color="inherit" 
-            component={Link} 
-            href="/recipes/new"
-            startIcon={<AddIcon />}
-            variant="outlined"
-            sx={{ borderColor: 'white', color: 'white', mr: 2 }}
-          >
-            เพิ่มสูตร
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              href="/recipes/new"
+              variant={pathname === '/recipes/new' ? 'outlined' : 'text'}
+              sx={{ 
+                borderColor: 'white', 
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '15px',
+                display: { xs: 'none', md: 'inline-flex' }
+              }}
+            >
+              + สูตรใหม่
+            </Button>
 
-          <UserProfilePanel />
+            <UserProfilePanel />
+          </Box>
         </Toolbar>
       </AppBar>
     </>

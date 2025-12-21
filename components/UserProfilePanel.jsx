@@ -19,30 +19,6 @@ export default function UserProfilePanel() {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      <IconButton color="inherit" size="small">
-        <Badge badgeContent={3} color="error">
-          <NotificationsIcon />
-        </Badge>
-      </IconButton>
-
-      <IconButton color="inherit" size="small">
-        <SettingsIcon />
-      </IconButton>
-
-      <Button
-        variant="outlined"
-        startIcon={<SupportAgentIcon />}
-        size="small"
-        sx={{ 
-          borderColor: 'white', 
-          color: 'white',
-          textTransform: 'none',
-          display: { xs: 'none', md: 'flex' }
-        }}
-      >
-        ติดต่อเจ้าหน้าที่
-      </Button>
-
       <Button
         onClick={(e) => setAnchorEl(e.currentTarget)}
         sx={{ color: 'white', textTransform: 'none', minWidth: 'auto' }}

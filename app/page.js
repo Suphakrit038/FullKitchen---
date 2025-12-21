@@ -41,6 +41,7 @@
 
 "use client"
 import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import SidebarFilters from '../components/SidebarFilters'
@@ -51,22 +52,71 @@ import { getAllRecipes } from '../lib/api'
 import CircularProgress from '@mui/material/CircularProgress'
 
 export default function HomePage() {
+  const searchParams = useSearchParams()
   const [recipes, setRecipes] = useState([])
+  const [filteredRecipes, setFilteredRecipes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({ category: '', tags: [], calories: [] })
 
   useEffect(() => {
     loadRecipes()
+  }, [])
+
+  useEffect(() => {
+    const query = searchParams.get('q')
+    if (query) {
+      const filtered = recipes.filter(r => 
+        r.name.toLowerCase().includes(query.toLowerCase()) ||
+        r.tags?.some(t => t.toLowerCase().includes(query.toLowerCase()))
+      )
+      setFilteredRecipes(filtered)
+    } else {
+      applyFilters()
+    }
+  }, [searchParams, recipes, filters])
+
+  useEffect(() => {
+    const handleTagFilter = (e) => {
+      const tag = e.detail
+      setFilters(prev => ({
+        ...prev,
+        tags: prev.tags.includes(tag) ? prev.tags : [...prev.tags, tag]
+      }))
+    }
+    window.addEventListener('filterByTag', handleTagFilter)
+    return () => window.removeEventListener('filterByTag', handleTagFilter)
   }, [])
 
   async function loadRecipes() {
     try {
       const data = await getAllRecipes({ sort: 'newest' })
       setRecipes(data)
+      setFilteredRecipes(data)
     } catch (error) {
       console.error('Error:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  function applyFilters() {
+    let filtered = [...recipes]
+    
+    if (filters.category) {
+      filtered = filtered.filter(r => r.tags?.includes(filters.category))
+    }
+    
+    if (filters.tags.length > 0) {
+      filtered = filtered.filter(r => 
+        filters.tags.some(tag => r.tags?.includes(tag))
+      )
+    }
+    
+    setFilteredRecipes(filtered)
+  }
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters)
   }
 
   if (loading) {
@@ -81,16 +131,19 @@ export default function HomePage() {
     <>
       <Box sx={{ display: 'flex', gap: 3, py: 3 }}>
         {/* Sidebar */}
-        <Box sx={{ width: 280, flexShrink: 0, display: { xs: 'none', md: 'block' } }}>
-          <SidebarFilters onFilterChange={(filters) => console.log(filters)} />
+        <Box sx={{ width: 300, flexShrink: 0, display: { xs: 'none', md: 'block' } }}>
+          <SidebarFilters 
+            onFilterChange={handleFilterChange}
+            resultCount={filteredRecipes.length}
+          />
         </Box>
 
         {/* Main Content */}
         <Box sx={{ flexGrow: 1 }}>
-          <MainContentHeader recipeCount={recipes.length} />
+          <MainContentHeader recipeCount={filteredRecipes.length} />
           
           <Grid container spacing={3}>
-            {recipes.map((recipe) => (
+            {filteredRecipes.map((recipe) => (
               <Grid item xs={12} sm={6} lg={4} key={recipe.id}>
                 <EnhancedRecipeCard recipe={recipe} />
               </Grid>

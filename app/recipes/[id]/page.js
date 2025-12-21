@@ -39,13 +39,15 @@ import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import CircularProgress from '@mui/material/CircularProgress'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
+import IconButton from '@mui/material/IconButton'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import RestaurantIcon from '@mui/icons-material/Restaurant'
+import CloseIcon from '@mui/icons-material/Close'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import { getRecipeById, deleteRecipe } from '../../../lib/api'
 import { formatDate } from '../../../lib/utils.client'
 import NotesSection from '../../../components/NotesSection'
@@ -56,6 +58,8 @@ export default function RecipeDetailPage() {
   const id = params?.id
   const [recipe, setRecipe] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [imageDialogOpen, setImageDialogOpen] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
     loadRecipe()
@@ -115,135 +119,336 @@ export default function RecipeDetailPage() {
 
   const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0)
 
+  // ถ้าไม่มีรูป ให้แสดง 3 รูป placeholder, ถ้ามีรูปให้แสดงรูปจริง
+  const placeholderImages = [
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%23e8f5e9" width="800" height="600"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="120"%3E🏢%3C/text%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%23fff3e0" width="800" height="600"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="120"%3E🏢%3C/text%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%23e3f2fd" width="800" height="600"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="120"%3E🏢%3C/text%3E%3C/svg%3E'
+  ]
+  const images = recipe.thumbnail ? [recipe.thumbnail] : placeholderImages
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
   return (
-    <Box>
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-            {recipe.name}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<EditIcon />}
-              onClick={() => router.push(`/recipes/${recipe.id}/edit`)}
+    <Box sx={{ maxWidth: 900, mx: 'auto', py: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Button 
+          onClick={() => router.push('/')}
+          sx={{ textTransform: 'none' }}
+        >
+          ← กลับหน้าหลัก
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<EditIcon />}
+          onClick={() => router.push(`/recipes/${recipe.id}/edit`)}
+        >
+          แก้ไข
+        </Button>
+      </Box>
+
+      <Paper sx={{ p: 4 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
+          {recipe.name}
+        </Typography>
+
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
+          สร้างเมื่อ {formatDate(recipe.createdAt)}
+        </Typography>
+
+        <Box sx={{ position: 'relative', mb: 4 }}>
+          {/* Main Image */}
+          <Box 
+            sx={{ 
+              borderRadius: 2, 
+              overflow: 'hidden', 
+              maxHeight: 400,
+              cursor: 'pointer',
+              position: 'relative',
+              bgcolor: 'transparent',
+              mb: 2,
+              '&:hover': {
+                '& .image-info-overlay': {
+                  opacity: 1
+                }
+              }
+            }}
+            onClick={() => setImageDialogOpen(true)}
+          >
+            <img 
+              src={images[currentImageIndex]} 
+              alt={recipe.name} 
+              style={{ width: '100%', height: 'auto', display: 'block' }} 
+            />
+
+            {/* Action Buttons - Top Right */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                display: 'flex',
+                gap: 1,
+                zIndex: 2
+              }}
             >
-              แก้ไข
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDelete}
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  router.push(`/recipes/${recipe.id}/edit`)
+                }}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.9)',
+                  '&:hover': { bgcolor: 'white' }
+                }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete()
+                }}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.9)',
+                  '&:hover': { bgcolor: 'white' }
+                }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Box>
+
+            {/* Fullscreen Button - Top Left */}
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation()
+                setImageDialogOpen(true)
+              }}
+              sx={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                bgcolor: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                '&:hover': { 
+                  bgcolor: 'rgba(0,0,0,0.8)',
+                  transform: 'scale(1.1)'
+                },
+                zIndex: 2
+              }}
             >
-              ลบ
-            </Button>
+              <FullscreenIcon fontSize="small" />
+            </IconButton>
+
+            {/* Image Info Overlay - Bottom */}
+            <Box
+              className="image-info-overlay"
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                bgcolor: 'rgba(0,0,0,0.7)',
+                color: 'white',
+                py: 1.5,
+                px: 2,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                opacity: 0.8,
+                transition: 'opacity 0.3s'
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {currentImageIndex + 1} / {images.length}
+              </Typography>
+              <Typography variant="body2" sx={{ mx: 2, opacity: 0.7 }}>
+                •
+              </Typography>
+              <Typography variant="body2">
+                คลิกเพื่อดูขนาดเต็ม
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Thumbnail Gallery */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}
+          >
+            {images.map((img, index) => (
+              <Box
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                sx={{
+                  width: 120,
+                  height: 90,
+                  borderRadius: 1,
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  border: currentImageIndex === index ? '3px solid' : '3px solid transparent',
+                  borderColor: currentImageIndex === index ? 'primary.main' : 'transparent',
+                  opacity: currentImageIndex === index ? 1 : 0.6,
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    opacity: 1,
+                    transform: 'scale(1.05)'
+                  }
+                }}
+              >
+                <img
+                  src={img}
+                  alt={`${recipe.name} ${index + 1}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </Box>
+            ))}
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-          {recipe.difficulty && (
-            <Chip 
-              label={recipe.difficulty}
-              color={
-                recipe.difficulty === 'ง่าย' ? 'success' : 
-                recipe.difficulty === 'ยาก' ? 'error' : 
-                'default'
-              }
-            />
-          )}
-          {totalTime > 0 && (
-            <Chip 
-              icon={<AccessTimeIcon />}
-              label={`${totalTime} นาที`}
-            />
-          )}
-          {recipe.prepTime > 0 && (
-            <Chip 
-              label={`เตรียม ${recipe.prepTime} นาที`}
-              variant="outlined"
-            />
-          )}
-          {recipe.cookTime > 0 && (
-            <Chip 
-              label={`ปรุง ${recipe.cookTime} นาที`}
-              variant="outlined"
-            />
-          )}
+        <Divider sx={{ my: 3 }} />
+
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          ส่วนผสม
+        </Typography>
+        <Box component="ol" sx={{ pl: 2.5, mb: 4 }}>
+          {recipe.ingredients.map((ingredient, index) => (
+            <Box component="li" key={index} sx={{ mb: 0.5 }}>
+              <Typography variant="body1">{ingredient}</Typography>
+            </Box>
+          ))}
+        </Box>
+
+        <Divider sx={{ my: 3 }} />
+
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          วิธีทำ
+        </Typography>
+        <Box component="ol" sx={{ pl: 2.5, mb: 4 }}>
+          {recipe.steps.map((step, index) => (
+            <Box component="li" key={index} sx={{ mb: 2 }}>
+              <Typography variant="body1">{step}</Typography>
+            </Box>
+          ))}
         </Box>
 
         {recipe.tags && recipe.tags.length > 0 && (
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-            {recipe.tags.map((tag, index) => (
-              <Chip key={index} label={tag} size="small" variant="outlined" />
-            ))}
-          </Box>
+          <>
+            <Divider sx={{ my: 3 }} />
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+              Tag #
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+              {recipe.tags.map((tag, index) => (
+                <Chip key={index} label={tag} size="small" />
+              ))}
+            </Box>
+          </>
         )}
-
-        <Typography variant="caption" color="text.secondary">
-          สร้างเมื่อ {formatDate(recipe.createdAt)}
-        </Typography>
       </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <RestaurantIcon color="primary" />
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            ส่วนผสม
-          </Typography>
-        </Box>
-        <List>
-          {recipe.ingredients.map((ingredient, index) => (
-            <ListItem key={index} sx={{ py: 0.5 }}>
-              <ListItemText 
-                primary={`${index + 1}. ${ingredient}`}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
+      <Box sx={{ mt: 3 }}>
+        <NotesSection 
+          recipeId={recipe.id} 
+          notes={recipe.notes || []} 
+          onUpdate={loadRecipe}
+        />
+      </Box>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-          วิธีทำ
-        </Typography>
-        <List>
-          {recipe.steps.map((step, index) => (
-            <React.Fragment key={index}>
-              <ListItem alignItems="flex-start" sx={{ py: 2 }}>
-                <Box
-                  sx={{
-                    minWidth: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    mr: 2,
-                    flexShrink: 0
-                  }}
-                >
-                  {index + 1}
-                </Box>
-                <ListItemText
-                  primary={step}
-                  sx={{ m: 0 }}
-                />
-              </ListItem>
-              {index < recipe.steps.length - 1 && <Divider />}
-            </React.Fragment>
-          ))}
-        </List>
-      </Paper>
-
-      <NotesSection 
-        recipeId={recipe.id} 
-        notes={recipe.notes || []} 
-        onUpdate={loadRecipe}
-      />
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <IconButton
+          onClick={() => setImageDialogOpen(false)}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: 'white',
+            bgcolor: 'rgba(0,0,0,0.5)',
+            zIndex: 1,
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' }
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent sx={{ p: 0, position: 'relative', bgcolor: 'black', minHeight: 400 }}>
+          <Box
+            component="img"
+            src={images[currentImageIndex]}
+            alt={recipe.name}
+            sx={{
+              width: '100%',
+              height: 'auto',
+              maxHeight: '90vh',
+              objectFit: 'contain'
+            }}
+          />
+          <IconButton
+            onClick={handlePrevImage}
+            sx={{
+              position: 'absolute',
+              left: 16,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'white',
+              bgcolor: 'rgba(0,0,0,0.5)',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' }
+            }}
+          >
+            <ChevronLeftIcon fontSize="large" />
+          </IconButton>
+          <IconButton
+            onClick={handleNextImage}
+            sx={{
+              position: 'absolute',
+              right: 16,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'white',
+              bgcolor: 'rgba(0,0,0,0.5)',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' }
+            }}
+          >
+            <ChevronRightIcon fontSize="large" />
+          </IconButton>
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 16,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              bgcolor: 'rgba(0,0,0,0.5)',
+              px: 2,
+              py: 0.5,
+              borderRadius: 1
+            }}
+          >
+            {currentImageIndex + 1} / {images.length}
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }
